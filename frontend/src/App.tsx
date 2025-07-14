@@ -2,16 +2,23 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/components/auth/AuthLayout';
 import LoginForm from '@/components/auth/LoginForm';
 import SignupForm from '@/components/auth/SignupForm';
 import Dashboard from '@/components/Dashboard';
-import { useAuth } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/providers/ThemeProviders';
 
-function AppContent() {
+// Component that uses auth context (must be inside AuthProvider)
+function AppRoutes() {
   const { user, loading } = useAuth();
 
+  console.log('🏁 AppRoutes: Render state:', { 
+    user: user?.email || 'No user', 
+    loading
+  });
+
+  // Show loading screen while checking auth
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-500 via-red-600 to-red-700">
@@ -29,30 +36,48 @@ function AppContent() {
     );
   }
 
+  console.log('🎯 AppRoutes: Routing with user:', !!user);
+
   return (
     <div className="min-h-screen">
       <AnimatePresence mode="wait">
         <Routes>
-          {user ? (
-            <>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </>
-          ) : (
-            <>
-              <Route path="/login" element={
-                <AuthLayout>
-                  <LoginForm />
-                </AuthLayout>
-              } />
-              <Route path="/signup" element={
-                <AuthLayout>
-                  <SignupForm />
-                </AuthLayout>
-              } />
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            </>
-          )}
+          {/* Dashboard route - protected */}
+          <Route 
+            path="/dashboard" 
+            element={user ? <Dashboard /> : <Navigate to="/login" replace />} 
+          />
+          
+          {/* Auth routes - redirect if already logged in */}
+          <Route 
+            path="/login" 
+            element={!user ? (
+              <AuthLayout>
+                <LoginForm />
+              </AuthLayout>
+            ) : <Navigate to="/dashboard" replace />} 
+          />
+          
+          <Route 
+            path="/signup" 
+            element={!user ? (
+              <AuthLayout>
+                <SignupForm />
+              </AuthLayout>
+            ) : <Navigate to="/dashboard" replace />} 
+          />
+          
+          {/* Default redirect */}
+          <Route 
+            path="/" 
+            element={<Navigate to={user ? "/dashboard" : "/login"} replace />} 
+          />
+          
+          {/* Catch all - redirect based on auth status */}
+          <Route 
+            path="*" 
+            element={<Navigate to={user ? "/dashboard" : "/login"} replace />} 
+          />
         </Routes>
       </AnimatePresence>
 
@@ -61,11 +86,15 @@ function AppContent() {
   );
 }
 
+// Main App component with correct provider order
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="auth-ui-theme">
       <Router>
-        <AppContent />
+        {/* AuthProvider INSIDE Router so it can use navigation hooks if needed */}
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
       </Router>
     </ThemeProvider>
   );

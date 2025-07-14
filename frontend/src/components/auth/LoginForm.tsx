@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,12 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { loginSchema, type LoginFormData } from '@/utils/validation';
 
 const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, loading, error } = useAuth();
+  const { login, loading, error, user } = useAuth();
+  const navigate = useNavigate();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -25,11 +26,23 @@ const LoginForm: React.FC = () => {
     },
   });
 
+  // NAVIGATION EFFECT: Navigate when user becomes available
+  useEffect(() => {
+    if (user) {
+      console.log('✅ LoginForm: User detected, navigating to dashboard');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
+
   const onSubmit = async (data: LoginFormData) => {
     try {
+      console.log('🔐 LoginForm: Submitting login for:', data.email);
       await login(data);
+      console.log('✅ LoginForm: Login completed successfully');
+      // Navigation is handled by useEffect above
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('❌ LoginForm: Login error:', err);
+      // Error is handled by useAuth hook
     }
   };
 
