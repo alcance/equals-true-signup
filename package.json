@@ -1,0 +1,15 @@
+{
+  "name": "equals-true-signup",
+  "version": "1.0.0",
+  "description": "EQUALS TRUE Sign-Up Flow - AWS Ready Foundation",
+  "scripts": {
+    "dev": "docker-compose up",
+    "build": "docker-compose build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test"
+  },
+  "keywords": ["react", "express", "typescript", "aws", "docker"],
+  "author": "Ivan Martinez",
+  "license": "MIT"
+}
