@@ -1,19 +1,34 @@
 # Development stage
 FROM node:18-alpine as development
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package*.json pnpm-lock.yaml* ./
+RUN pnpm install
+
+# Copy source code
 COPY . .
+
 EXPOSE 3000
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["pnpm", "run", "dev", "--", "--host"]
 
 # Build stage
 FROM node:18-alpine as builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package*.json pnpm-lock.yaml* ./
+RUN pnpm install
+
+# Copy source and build
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
 # Production stage
 FROM nginx:alpine as production
