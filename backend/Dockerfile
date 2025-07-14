@@ -1,29 +1,52 @@
 # Development stage
 FROM node:18-alpine as development
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package*.json pnpm-lock.yaml* ./
+RUN pnpm install
+
+# Copy source code
 COPY . .
-RUN npx prisma generate
+RUN pnpm prisma generate
+
 EXPOSE 3001
-CMD ["npm", "run", "dev"]
+CMD ["pnpm", "run", "dev"]
 
 # Build stage
 FROM node:18-alpine as builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package*.json pnpm-lock.yaml* ./
+RUN pnpm install
+
+# Copy source and build
 COPY . .
-RUN npx prisma generate
-RUN npm run build
+RUN pnpm prisma generate
+RUN pnpm run build
 
 # Production stage
 FROM node:18-alpine as production
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package*.json pnpm-lock.yaml* ./
+RUN pnpm install --prod
+
+# Copy built application
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
-RUN npx prisma generate
+RUN pnpm prisma generate
+
 EXPOSE 3001
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]
