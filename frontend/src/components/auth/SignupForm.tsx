@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { signupSchema, type SignupFormData } from '@/utils/validation';
 
 const SignupForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { signup, loading, error } = useAuth();
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  const { signup, loading, error, user } = useAuth();
+  const navigate = useNavigate();
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -28,12 +30,39 @@ const SignupForm: React.FC = () => {
     },
   });
 
+  // Navigate when user becomes authenticated
+  useEffect(() => {
+    console.log('🔍 SignupForm: Auth state changed', { 
+      user: user?.email || 'No user',
+      loading,
+      error,
+      signupSuccess
+    });
+
+    if (user && !loading) {
+      console.log('🎉 SignupForm: User authenticated! Navigating to dashboard...', user);
+      setSignupSuccess(true);
+      
+      // Navigate to dashboard after showing success message
+      setTimeout(() => {
+        console.log('🚀 SignupForm: Navigating to dashboard');
+        navigate('/dashboard', { replace: true });
+      }, 1000);
+    }
+  }, [user, loading, navigate]);
+
   const onSubmit = async (data: SignupFormData) => {
     try {
+      console.log('📝 SignupForm: Attempting signup for:', data.email);
+      setSignupSuccess(false);
+      
       const { confirmPassword, ...signupData } = data;
       await signup(signupData);
+      console.log('✅ SignupForm: Signup completed');
+      
     } catch (err) {
-      console.error('Signup error:', err);
+      console.error('❌ SignupForm: Signup error:', err);
+      setSignupSuccess(false);
     }
   };
 
@@ -56,7 +85,7 @@ const SignupForm: React.FC = () => {
 
       {/* Error Alert */}
       <AnimatePresence>
-        {error && (
+        {error && !user && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -65,6 +94,25 @@ const SignupForm: React.FC = () => {
           >
             <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Message */}
+      <AnimatePresence>
+        {(user || signupSuccess) && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Alert className="border-green-200 bg-green-50 text-green-800">
+              <CheckCircle className="w-4 h-4" />
+              <AlertDescription>
+                Account created successfully! Redirecting to dashboard...
+              </AlertDescription>
             </Alert>
           </motion.div>
         )}
@@ -85,7 +133,7 @@ const SignupForm: React.FC = () => {
                     type="text"
                     placeholder="Full name"
                     autoComplete="name"
-                    disabled={loading}
+                    disabled={loading || !!user}
                     className="h-12 text-base bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     {...field}
                   />
@@ -106,7 +154,7 @@ const SignupForm: React.FC = () => {
                     type="email"
                     placeholder="Email address"
                     autoComplete="email"
-                    disabled={loading}
+                    disabled={loading || !!user}
                     className="h-12 text-base bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     {...field}
                   />
@@ -128,7 +176,7 @@ const SignupForm: React.FC = () => {
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
                       autoComplete="new-password"
-                      disabled={loading}
+                      disabled={loading || !!user}
                       className="h-12 text-base bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-red-500 focus:border-transparent pr-12"
                       {...field}
                     />
@@ -136,7 +184,7 @@ const SignupForm: React.FC = () => {
                       type="button"
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                       onClick={() => setShowPassword(!showPassword)}
-                      disabled={loading}
+                      disabled={loading || !!user}
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -163,7 +211,7 @@ const SignupForm: React.FC = () => {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm password"
                       autoComplete="new-password"
-                      disabled={loading}
+                      disabled={loading || !!user}
                       className="h-12 text-base bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-red-500 focus:border-transparent pr-12"
                       {...field}
                     />
@@ -171,7 +219,7 @@ const SignupForm: React.FC = () => {
                       type="button"
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      disabled={loading}
+                      disabled={loading || !!user}
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -190,12 +238,17 @@ const SignupForm: React.FC = () => {
           <Button
             type="submit"
             className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200"
-            disabled={loading}
+            disabled={loading || !!user}
           >
             {loading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin" />
                 Creating account...
+              </div>
+            ) : user ? (
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                Redirecting...
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -229,12 +282,24 @@ const SignupForm: React.FC = () => {
         <Button 
           variant="outline" 
           className="w-full h-12 border-2 border-gray-200 dark:border-gray-700 hover:border-red-600 hover:text-red-600 font-semibold text-base transition-all duration-200"
-          disabled={loading}
+          disabled={loading || !!user}
           type="button"
         >
           Sign In
         </Button>
       </Link>
+
+      {/* Debug Info (development only) */}
+      {import.meta.env?.DEV && (
+        <div className="text-xs text-gray-500 text-center space-y-1 p-2 bg-gray-100 rounded">
+          <div><strong>Debug Info:</strong></div>
+          <div>User: {user?.email || 'None'}</div>
+          <div>Loading: {loading.toString()}</div>
+          <div>Error: {error || 'None'}</div>
+          <div>Signup Success: {signupSuccess.toString()}</div>
+          <div>Current URL: {window.location.pathname}</div>
+        </div>
+      )}
     </motion.div>
   );
 };
