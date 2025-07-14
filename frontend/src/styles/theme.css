@@ -1,0 +1,82 @@
+/* Import Tailwind's directives FIRST */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Define your custom HSL color variables here */
+:root {
+  /* Brand Red */
+  --brand-red-500: 0 84.2% 60.2%; /* Example: a vibrant red */
+  --brand-red-700: 0 84.2% 40.2%; /* Darker red */
+
+  /* Brand White */
+  --brand-white: 0 0% 100%;
+
+  /* Brand Yellow */
+  --brand-yellow-400: 48 95.8% 65.5%; /* Example: a bright yellow */
+  --brand-yellow-600: 48 95.8% 45.5%; /* Darker yellow */
+
+  /* Brand Green */
+  --brand-green-500: 142.1 76.2% 36.3%; /* Example: a medium green */
+  --brand-green-700: 142.1 76.2% 26.3%; /* Darker green */
+
+
+  /* Override existing Tailwind color variables with your brand colors */
+  --background: var(--brand-white); /* Use white as background */
+  --foreground: var(--brand-red-700); /* Use a darker red for foreground text */
+
+  --card: var(--brand-white);
+  --card-foreground: var(--brand-red-700);
+
+  --popover: var(--brand-white);
+  --popover-foreground: var(--brand-red-700);
+
+  --primary: var(--brand-red-500); /* Primary buttons/elements in red */
+  --primary-foreground: var(--brand-white); /* White text on primary buttons */
+
+  --secondary: var(--brand-yellow-400); /* Secondary elements in yellow */
+  --secondary-foreground: var(--brand-red-700); /* Dark red text on secondary */
+
+  --muted: 0 0% 96.1%; /* Keep some muted for subtle elements, or change to a very light brand color */
+  --muted-foreground: 0 0% 45.1%;
+
+  --accent: var(--brand-green-500); /* Accent elements in green */
+  --accent-foreground: var(--brand-white); /* White text on accent */
+
+  --destructive: 0 84.2% 60.2%; /* Typically red for destructive actions */
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 89.1%; /* Adjust border color */
+  --input: 0 0% 95.1%; /* Adjust input background */
+  --ring: var(--brand-red-500); /* Adjust ring color (focus states) */
+
+  /* Chart colors - adapt to your new palette */
+  --chart-1: var(--brand-red-500);
+  --chart-2: var(--brand-yellow-400);
+  --chart-3: var(--brand-green-500);
+  --chart-4: var(--brand-red-700);
+  --chart-5: var(--brand-yellow-600);
+}
+
+/* Dark mode variations if applicable - adjust these as well */
+.dark {
+  --background: 0 0% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 0 0% 9%;
+  --secondary: 0 0% 14.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 0 0% 14.9%;
+  --muted-foreground: 0 0% 80.1%;
+  --accent: 0 0% 14.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 14.9%;
+  --input: 0 0% 14.9%;
+  --ring: 0 0% 83.1%;
+}
