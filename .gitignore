@@ -10,6 +10,14 @@ pnpm-lock.yaml
 .env
 .env.local
 .env.production
+.env.*.local
+backend/.env
+backend/.env.test
+backend/.env.local
+backend/.env.production
+frontend/.env
+frontend/.env.local
+frontend/.env.production
 
 # Database
 *.db
@@ -51,3 +59,21 @@ backend/prisma/migrations/
 # Testing
 coverage/
 *.lcov
+
+# Temporary files
+*.tmp
+*.temp
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

@@ -3,23 +3,25 @@ import { AuthService } from '../../src/services/authService';
 import { UserService } from '../../src/services/userService';
 import { JwtConfig } from '../../src/config/jwt';
 import { HashHelper } from '../../src/utils/helpers';
+import { AppError } from '../../src/middleware/errorHandler';
 
 // Mock dependencies
 jest.mock('../../src/services/userService');
 jest.mock('../../src/config/jwt');
 jest.mock('../../src/utils/helpers');
 
+const MockedUserService = UserService as jest.MockedClass<typeof UserService>;
+const MockedJwtConfig = JwtConfig as jest.Mocked<typeof JwtConfig>;
+const MockedHashHelper = HashHelper as jest.Mocked<typeof HashHelper>;
+
 describe('AuthService', () => {
   let authService: AuthService;
   let mockUserService: jest.Mocked<UserService>;
 
   beforeEach(() => {
+    mockUserService = new MockedUserService() as jest.Mocked<UserService>;
     authService = new AuthService();
-    mockUserService = jest.mocked(new UserService());
     (authService as any).userService = mockUserService;
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -40,7 +42,7 @@ describe('AuthService', () => {
       };
 
       mockUserService.createUser.mockResolvedValue(mockUser);
-      (JwtConfig.generateToken as jest.Mock).mockReturnValue('mock-token');
+      MockedJwtConfig.generateToken.mockReturnValue('mock-token');
 
       const result = await authService.signup(signupData);
 
@@ -50,7 +52,8 @@ describe('AuthService', () => {
     });
 
     it('should throw error if user creation fails', async () => {
-      mockUserService.createUser.mockRejectedValue(new Error('Database error'));
+      const error = new AppError('Database error', 500);
+      mockUserService.createUser.mockRejectedValue(error);
 
       await expect(authService.signup(signupData)).rejects.toThrow();
     });
@@ -73,8 +76,8 @@ describe('AuthService', () => {
       };
 
       mockUserService.getUserWithPassword.mockResolvedValue(mockUser);
-      (HashHelper.comparePassword as jest.Mock).mockResolvedValue(true);
-      (JwtConfig.generateToken as jest.Mock).mockReturnValue('mock-token');
+      MockedHashHelper.comparePassword.mockResolvedValue(true);
+      MockedJwtConfig.generateToken.mockReturnValue('mock-token');
 
       const result = await authService.login(loginData);
 
@@ -86,6 +89,43 @@ describe('AuthService', () => {
       mockUserService.getUserWithPassword.mockResolvedValue(null);
 
       await expect(authService.login(loginData)).rejects.toThrow('Invalid email or password');
+    });
+
+    it('should throw error for wrong password', async () => {
+      const mockUser = {
+        id: '1',
+        fullName: 'John Doe',
+        email: 'john@example.com',
+        passwordHash: 'hashed-password',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockUserService.getUserWithPassword.mockResolvedValue(mockUser);
+      MockedHashHelper.comparePassword.mockResolvedValue(false);
+
+      await expect(authService.login(loginData)).rejects.toThrow('Invalid email or password');
+    });
+  });
+
+  describe('verifyToken', () => {
+    it('should return true for valid token', async () => {
+      MockedJwtConfig.verifyToken.mockReturnValue({
+        userId: '1',
+        email: 'test@example.com',
+      });
+
+      const result = await authService.verifyToken('valid-token');
+      expect(result).toBe(true);
+    });
+
+    it('should return false for invalid token', async () => {
+      MockedJwtConfig.verifyToken.mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
+
+      const result = await authService.verifyToken('invalid-token');
+      expect(result).toBe(false);
     });
   });
 });
