@@ -26,23 +26,24 @@ export class App {
     this.app.use(express.urlencoded({ extended: true }));
 
     const limiter = rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
+      windowMs: 15 * 60 * 1000,
+      max: 100,
       message: 'Too many requests from this IP',
     });
 
-    // Exclude Swagger docs from rate limiting
+    // Apply rate limiter except for Swagger docs
     this.app.use((req, res, next) => {
       if (req.path.startsWith('/api/docs')) return next();
-      limiter(req, res, next);
+      return limiter(req, res, next);
     });
 
-    // Serve swagger.json explicitly
+    // Serve Swagger JSON spec
     this.app.get('/api/docs/swagger.json', (req, res) => {
-      res.json(specs);
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).json(specs);
     });
 
-    // Swagger UI setup to load swagger.json from the above route
+    // Serve Swagger UI
     this.app.use(
       '/api/docs',
       swaggerUi.serve,
@@ -50,6 +51,7 @@ export class App {
         swaggerOptions: {
           url: '/api/docs/swagger.json',
         },
+        customSiteTitle: 'Equals True API Docs',
       })
     );
   }
@@ -57,7 +59,7 @@ export class App {
   private initializeRoutes(): void {
     this.app.use('/api', routes);
 
-    // Health check endpoint
+    // Health check
     this.app.get('/health', (req, res) => {
       res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
     });
@@ -74,3 +76,4 @@ export class App {
     });
   }
 }
+
