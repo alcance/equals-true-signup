@@ -4,6 +4,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 const fileExtension = isDevelopment ? 'ts' : 'js';
 const sourceDir = isDevelopment ? './src' : './dist';
 
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -67,3 +68,5 @@ const options = {
 };
 
 export const specs = swaggerJsdoc(options);
+
+console.log('Swagger specs generated:', JSON.stringify(specs, null, 2));

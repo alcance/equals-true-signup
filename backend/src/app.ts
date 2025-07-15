@@ -31,24 +31,17 @@ export class App {
       max: 100, // limit each IP to 100 requests per windowMs
       message: 'Too many requests from this IP'
     });
-    this.app.use(limiter);
 
-
-
-    // Swagger documentation
-    const swaggerOptions = {
-      swaggerOptions: {
-        url: 'http://3.16.159.186:3001/api/docs/swagger.json',
-      },
-    };
-
-    this.app.get('/api/docs/swagger.json', (req, res) => {
-      res.json(specs);
+    // Exclude swagger docs from rate limiting
+    this.app.use((req, res, next) => {
+      if (req.path.startsWith('/api/docs')) {
+        return next();
+      }
+      limiter(req, res, next);
     });
 
-
-    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(null, swaggerOptions));
-
+    // Swagger documentation
+    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs));
   }
 
   private initializeRoutes(): void {
