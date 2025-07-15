@@ -35,17 +35,17 @@ export class App {
 
 
 
-
-    this.app.get('/api/docs/swagger.json', (req, res) => {
-      res.json(specs);
-    });
-
     // Swagger documentation
     const swaggerOptions = {
       swaggerOptions: {
         url: 'http://3.16.159.186:3001/api/docs/swagger.json',
       },
     };
+
+    this.app.get('/api/docs/swagger.json', (req, res) => {
+      res.json(specs);
+    });
+
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(null, swaggerOptions));
 
