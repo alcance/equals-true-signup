@@ -26,7 +26,7 @@ RUN pnpm prisma generate
 RUN pnpm run build
 
 # Force rebuild bcrypt for Alpine Linux architecture
-RUN pnpm rebuild bcrypt --build-from-source
+RUN pnpm rebuild bcrypt
 
 # Change ownership to non-root user
 RUN chown -R appuser:expressjs /app
