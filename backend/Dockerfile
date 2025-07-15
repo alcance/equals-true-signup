@@ -42,13 +42,15 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy package files
+# Copy package files and install ALL dependencies (including Prisma)
 COPY package*.json pnpm-lock.yaml* ./
-RUN pnpm install --prod
+RUN pnpm install
 
-# Copy built application
+# Copy built application and prisma
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+
+# Generate Prisma client
 RUN pnpm prisma generate
 
 # Change ownership
