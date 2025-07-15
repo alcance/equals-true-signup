@@ -1,5 +1,4 @@
-// backend/src/utils/helpers.ts
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 export class HashHelper {
   private static readonly saltRounds = 12;
