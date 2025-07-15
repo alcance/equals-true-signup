@@ -34,12 +34,7 @@ export class App {
     this.app.use(limiter);
 
     // Swagger documentation
-    const swaggerOptions = {
-      swaggerOptions: {
-        url: 'http://3.16.159.186:3001/api/docs/swagger.json'
-      }
-    };
-    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, swaggerOptions));
+    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs));
   }
 
   private initializeRoutes(): void {
