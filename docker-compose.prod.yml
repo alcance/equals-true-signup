@@ -23,7 +23,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
     ports:
-      - "3001:3001"
+      - "0.0.0.0:3001:3001"  # Bind to all interfaces for external access
     depends_on:
       db:
         condition: service_healthy
@@ -37,8 +37,8 @@ services:
       args:
         - VITE_API_URL=${VITE_API_URL}
     ports:
-      - "3000:80"
-      - "80:80"
+      - "0.0.0.0:3000:80"    # Bind to all interfaces for external access
+      - "0.0.0.0:80:80"      # Bind to all interfaces for external access
     depends_on:
       - backend
     restart: unless-stopped
