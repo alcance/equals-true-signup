@@ -1,4 +1,3 @@
-# Production stage - Single stage to avoid bcrypt issues
 FROM node:18-alpine as production
 WORKDIR /app
 
@@ -26,10 +25,10 @@ RUN pnpm prisma generate
 # Build TypeScript
 RUN pnpm run build
 
-# Force rebuild bcrypt with pnpm (more reliable than node-gyp directly)
+# Rebuild bcrypt for Alpine (using pnpm, more reliable than node-gyp directly)
 RUN pnpm rebuild bcrypt
 
-# Change ownership
+# Change ownership to non-root user
 RUN chown -R appuser:expressjs /app
 USER appuser
 
