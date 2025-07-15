@@ -24,7 +24,7 @@ export class App {
     this.app.use(cors());
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true }));
-    
+
     // Rate limiting
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
@@ -34,12 +34,17 @@ export class App {
     this.app.use(limiter);
 
     // Swagger documentation
-    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs));
+    const swaggerOptions = {
+      swaggerOptions: {
+        url: 'http://3.16.159.186:3001/api/docs/swagger.json'
+      }
+    };
+    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, swaggerOptions));
   }
 
   private initializeRoutes(): void {
     this.app.use('/api', routes);
-    
+
     // Health check
     this.app.get('/health', (req, res) => {
       res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
