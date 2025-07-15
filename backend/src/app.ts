@@ -33,18 +33,21 @@ export class App {
     });
     this.app.use(limiter);
 
-    const swaggerOptions = {
-      swaggerOptions: {
-        url: '/api/docs/swagger.json',
-      },
-    };
+
+
 
     this.app.get('/api/docs/swagger.json', (req, res) => {
       res.json(specs);
     });
 
     // Swagger documentation
-    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(undefined, swaggerOptions));
+    const swaggerOptions = {
+      swaggerOptions: {
+        url: 'http://3.16.159.186:3001/api/docs/swagger.json',
+      },
+    };
+
+    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(null, swaggerOptions));
 
   }
 
