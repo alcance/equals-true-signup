@@ -49,9 +49,9 @@ export class App {
       swaggerUi.serve,
       swaggerUi.setup(undefined, {
         swaggerOptions: {
-          url: '/api/docs/swagger.json',
+          url: 'http://3.16.159.186:3001/api/docs/swagger.json',
+          validatorUrl: null,
         },
-        customSiteTitle: 'Equals True API Docs',
       })
     );
   }
