@@ -1,73 +1,37 @@
-# Development stage
-FROM node:18-alpine as development
+# Production stage - Single stage to avoid bcrypt issues
+FROM node:18-alpine as production
 WORKDIR /app
 
-# Install build dependencies for native modules
-RUN apk add --no-cache python3 make g++
+# Install build dependencies for native modules (bcrypt needs these)
+RUN apk add --no-cache python3 make g++ linux-headers
+
+# Create non-root user for Express app
+RUN addgroup -g 1001 -S expressjs && adduser -S appuser -u 1001 -G expressjs
 
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy package files
+# Copy package files first
 COPY package*.json pnpm-lock.yaml* ./
+
+# Install dependencies (this will compile bcrypt for Alpine Linux)
 RUN pnpm install
 
 # Copy source code
 COPY . .
-RUN pnpm prisma generate
-
-EXPOSE 3001
-CMD ["pnpm", "run", "dev"]
-
-# Build stage
-FROM node:18-alpine as builder
-WORKDIR /app
-
-# Install build dependencies for native modules
-RUN apk add --no-cache python3 make g++
-
-# Install pnpm
-RUN npm install -g pnpm
-
-# Copy package files
-COPY package*.json pnpm-lock.yaml* ./
-RUN pnpm install
-
-# Copy source and build
-COPY . .
-RUN pnpm prisma generate
-RUN pnpm run build
-
-# Production stage
-FROM node:18-alpine as production
-WORKDIR /app
-
-# Install build dependencies for native modules (needed for bcrypt)
-RUN apk add --no-cache python3 make g++
-
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
-
-# Install pnpm
-RUN npm install -g pnpm
-
-# Copy package files and install dependencies
-COPY package*.json pnpm-lock.yaml* ./
-RUN pnpm install
-
-# Copy built application and prisma
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
 
 # Generate Prisma client
 RUN pnpm prisma generate
 
-# Rebuild native modules for this environment
-RUN pnpm rebuild bcrypt
+# Build TypeScript
+RUN pnpm run build
+
+# Force rebuild bcrypt specifically for this environment
+RUN cd /app/node_modules/bcrypt && node-gyp rebuild
 
 # Change ownership
-RUN chown -R nextjs:nodejs /app
-USER nextjs
+RUN chown -R appuser:expressjs /app
+USER appuser
 
 EXPOSE 3001
 CMD ["pnpm", "start"]
