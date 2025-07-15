@@ -18,6 +18,8 @@ services:
     build:
       context: ./backend
       target: production
+    env_file:
+      - .env.production
     environment:
       - NODE_ENV=production
       - DATABASE_URL=${DATABASE_URL}
