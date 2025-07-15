@@ -1,4 +1,3 @@
-// backend/src/utils/swagger.ts
 import swaggerJsdoc from 'swagger-jsdoc';
 
 const options = {
@@ -12,7 +11,7 @@ const options = {
     servers: [
       {
         url: process.env.NODE_ENV === 'production' 
-          ? 'https://api.equalstrue.com' 
+          ? 'http://3.16.159.186:3001' 
           : 'http://localhost:3001',
         description: process.env.NODE_ENV === 'production' ? 'Production' : 'Development',
       },
