@@ -7,8 +7,8 @@ RUN apk add --no-cache python3 make g++ linux-headers
 # Create non-root user for Express app
 RUN addgroup -g 1001 -S expressjs && adduser -S appuser -u 1001 -G expressjs
 
-# Install pnpm and node-gyp globally
-RUN npm install -g pnpm node-gyp
+# Use corepack to enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy package files first
 COPY package*.json pnpm-lock.yaml* ./
