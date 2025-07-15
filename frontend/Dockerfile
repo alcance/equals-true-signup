@@ -1,28 +1,45 @@
-# Build stage
-FROM node:20-alpine as builder
+FROM node:20-alpine as production
 WORKDIR /app
 
+# Install build dependencies for native modules (bcrypt needs these)
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    linux-headers \
+    libc6-compat
+
+# Create non-root user for Express app
+RUN addgroup -g 1001 -S expressjs && \
+    adduser -S appuser -u 1001 -G expressjs
+
+# Use corepack to enable pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY package*.json pnpm-lock.yaml* ./
-RUN pnpm install
+# Copy package files first
+COPY package*.json ./
+# Don't copy pnpm-lock.yaml to force fresh resolution
+# COPY pnpm-lock.yaml* ./
 
+# Clear any existing pnpm cache and install fresh
+RUN pnpm store prune && \
+    pnpm install --no-frozen-lockfile --shamefully-hoist
+
+# Copy source code
 COPY . .
 
-# Accept build args
-ARG VITE_API_URL
-ENV VITE_API_URL=${VITE_API_URL}
+# Generate Prisma client
+RUN pnpm prisma generate
 
+# Build TypeScript
 RUN pnpm run build
 
-# Production stage
-FROM nginx:alpine as production
+# Rebuild bcrypt specifically for Alpine Linux using pnpm (not npm!)
+RUN pnpm rebuild bcrypt
 
-# Copy nginx config (optional, if you have custom config)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Change ownership to non-root user
+RUN chown -R appuser:expressjs /app
+USER appuser
 
-# Copy built app
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 3001
+CMD ["pnpm", "start"]
