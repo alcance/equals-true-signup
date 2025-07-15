@@ -3,28 +3,8 @@ set -e
 
 echo "🚀 Deploying EQUALS TRUE to AWS..."
 
-# Get EC2 public IP with IMDSv2 support
-get_public_ip() {
-    # Try IMDSv2 (required for your instance)
-    TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" 2>/dev/null)
-    if [ -n "$TOKEN" ]; then
-        PUBLIC_IP=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
-    fi
-    
-    # Fallback to old method
-    if [ -z "$PUBLIC_IP" ]; then
-        PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
-    fi
-    
-    # Final fallback to known IP
-    if [ -z "$PUBLIC_IP" ]; then
-        PUBLIC_IP="3.16.159.186"
-    fi
-    
-    echo "$PUBLIC_IP"
-}
-
-PUBLIC_IP=$(get_public_ip)
+# Use your known public IP
+PUBLIC_IP="3.16.159.186"
 echo "📍 Server IP: $PUBLIC_IP"
 
 # Create environment file
