@@ -9,8 +9,8 @@ pnpm-lock.yaml
 # Environment variables
 .env
 .env.local
-.env.production                        # ← Add this
-.env.staging                           # ← Add this too
+.env.production
+.env.staging
 .env.*.local
 backend/.env
 backend/.env.test
@@ -68,11 +68,6 @@ coverage/
 # Cache directories
 .cache/
 .parcel-cache/
-
-# Deployment scripts (optional - you might want to include these)
-# deploy.sh
-# cleanup.sh
-# test-deployment.sh
 
 # Editor directories and files
 .vscode/*
