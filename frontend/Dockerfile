@@ -1,5 +1,5 @@
 # Development stage
-FROM node:18-alpine as development
+FROM nginx:alpine as production
 WORKDIR /app
 
 # Install pnpm

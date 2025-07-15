@@ -1,4 +1,4 @@
-FROM node:18-alpine as production
+FROM node:20-alpine as production
 WORKDIR /app
 
 # Install build dependencies for native modules (bcrypt needs these)
