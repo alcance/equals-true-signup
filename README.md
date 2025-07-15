@@ -2,7 +2,7 @@
 
 A full-stack TypeScript application with React frontend, Express backend, and PostgreSQL database, containerized with Docker and ready for AWS deployment.
 
-**🎯 Live Demo**: [http://3.16.159.186](http://3.16.159.186) | **API**: [http://3.16.159.186:3001/api](http://3.16.159.186:3001/api)
+**🎯 Live Demo**: [http://3.16.159.186](http://3.16.159.186) | **API**: [http://3.16.159.186:3001/api](http://3.16.159.186:3001/api)  | **Swagger Docs**: [http://3.16.159.186:3001/api/docs](http://3.16.159.186:3001/api/docs)
 
 ## 🚀 Quick Start
 
