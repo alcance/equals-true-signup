@@ -4,7 +4,6 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 const fileExtension = isDevelopment ? 'ts' : 'js';
 const sourceDir = isDevelopment ? './src' : './dist';
 
-
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -15,10 +14,12 @@ const options = {
     },
     servers: [
       {
+        // In production, the Nginx server handles the public IP/domain on port 80.
+        // In development, you might access directly via localhost:3001 if bypassing Nginx.
         url: process.env.NODE_ENV === 'production' 
-          ? 'http://3.16.159.186:3001' 
-          : 'http://localhost:3001',
-        description: process.env.NODE_ENV === 'production' ? 'Production' : 'Development',
+          ? 'http://3.16.159.186' // Nginx is listening on port 80, no :3001 needed here for external access
+          : 'http://localhost:3001', // Direct access during local development
+        description: process.env.NODE_ENV === 'production' ? 'Production via Nginx' : 'Development Direct',
       },
     ],
     components: {

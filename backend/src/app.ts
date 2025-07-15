@@ -1,10 +1,9 @@
-// backend/src/app.ts
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
-import { specs } from './utils/swagger';
+import { specs } from './utils/swagger'; // Ensure this import path is correct
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 import routes from './routes';
@@ -47,9 +46,11 @@ export class App {
     this.app.use(
       '/api/docs',
       swaggerUi.serve,
-      swaggerUi.setup(undefined, {
+      swaggerUi.setup(specs, { // Pass 'specs' directly here
         swaggerOptions: {
-          url: 'http://3.16.159.186:3001/api/docs/swagger.json',
+          // Use a relative path for Swagger JSON. Nginx will correctly proxy this.
+          // This makes it work seamlessly whether accessed via localhost or your IP through Nginx.
+          url: '/api/docs/swagger.json',
           validatorUrl: null,
         },
       })
@@ -76,4 +77,3 @@ export class App {
     });
   }
 }
-
