@@ -2,6 +2,9 @@
 FROM node:18-alpine as development
 WORKDIR /app
 
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++
+
 # Install pnpm
 RUN npm install -g pnpm
 
@@ -20,6 +23,9 @@ CMD ["pnpm", "run", "dev"]
 FROM node:18-alpine as builder
 WORKDIR /app
 
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++
+
 # Install pnpm
 RUN npm install -g pnpm
 
@@ -36,13 +42,16 @@ RUN pnpm run build
 FROM node:18-alpine as production
 WORKDIR /app
 
+# Install build dependencies for native modules (needed for bcrypt)
+RUN apk add --no-cache python3 make g++
+
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy package files and install ALL dependencies (including Prisma)
+# Copy package files and install dependencies
 COPY package*.json pnpm-lock.yaml* ./
 RUN pnpm install
 
@@ -52,6 +61,9 @@ COPY --from=builder /app/prisma ./prisma
 
 # Generate Prisma client
 RUN pnpm prisma generate
+
+# Rebuild native modules for this environment
+RUN pnpm rebuild bcrypt
 
 # Change ownership
 RUN chown -R nextjs:nodejs /app
