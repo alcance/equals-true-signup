@@ -8,8 +8,8 @@ RUN apk add --no-cache python3 make g++ linux-headers
 # Create non-root user for Express app
 RUN addgroup -g 1001 -S expressjs && adduser -S appuser -u 1001 -G expressjs
 
-# Install pnpm
-RUN npm install -g pnpm
+# Install pnpm and node-gyp globally
+RUN npm install -g pnpm node-gyp
 
 # Copy package files first
 COPY package*.json pnpm-lock.yaml* ./
@@ -26,8 +26,8 @@ RUN pnpm prisma generate
 # Build TypeScript
 RUN pnpm run build
 
-# Force rebuild bcrypt specifically for this environment
-RUN cd /app/node_modules/bcrypt && node-gyp rebuild
+# Force rebuild bcrypt with pnpm (more reliable than node-gyp directly)
+RUN pnpm rebuild bcrypt
 
 # Change ownership
 RUN chown -R appuser:expressjs /app
